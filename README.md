@@ -16,7 +16,7 @@ Python 3.4+
 You can download directly from Github repo or you can use pip to install 
 
 ```sh
-pip install git+https://github.com//.git
+pip install git+https://github.com/Xooa/xooa-python-sdk.git
 ```
 (you may need to run `pip` with root permission: `sudo pip install git+https://github.com//.git`)
 
