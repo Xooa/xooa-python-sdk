@@ -1,5 +1,5 @@
 /**
- * Go SDK for Xooa
+ * Python SDK for Xooa
  *
  * Copyright 2018 Xooa
  *
