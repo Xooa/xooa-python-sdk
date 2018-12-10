@@ -1,0 +1,7 @@
+example/.ipynb_checkpoints
+example/dev.log
+dev.log
+venv
+docs
+.idea
+xooa_api/__pycache__/

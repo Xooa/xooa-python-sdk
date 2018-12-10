@@ -1,3 +1,20 @@
+#
+# Python SDK for Xooa
+#
+# Copyright 2018 Xooa
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at:
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
+#
+# Author: Rahul Kamboj
+#
+
 from .xooa_exceptions import XooaApiException, InvalidParameterException
 from .invoke import InvokeApi
 from .query import QueryApi
@@ -18,11 +35,11 @@ class XooaClient(object):
         self.error = {
             'error_msg': 'Unauthorized',
             'error_code': 401}
-        self.socket_host = 'https://api.xooa.io/subscribe'
+        self.socket_host = 'https://api.xooa.com/subscribe'
         self.token_prefix = 'Bearer '
         self.req_params = {
             'headers': {'Content-Type': 'application/json'},
-            'base_url': 'https://api.ci.xooa.io/api/v1/'}
+            'base_url': 'https://api.xooa.com/api/v1/'}
         self.logs = Logger()
         self.xooa_logger = self.logs.get_logger('DEBUG')
 
@@ -75,7 +92,7 @@ class XooaClient(object):
     def invoke_async(self, fcn, **kwargs):
         if self.is_valid:
             invoke_api = InvokeApi()
-            r = invoke_api.invoke(self, fcn, async='true', **kwargs)
+            r = invoke_api.invoke(self, fcn, asyncKey='true', **kwargs)
             return r
         else:
             raise XooaApiException(self.error['error_msg'], self.error['error_code'])
@@ -91,7 +108,7 @@ class XooaClient(object):
     def query_async(self, fcn, **kwargs):
         if self.is_valid:
             query_api = QueryApi()
-            r = query_api.query(self, fcn, async='true', **kwargs)
+            r = query_api.query(self, fcn, asyncKey='true', **kwargs)
             return r
         else:
             raise XooaApiException(self.error['error_msg'], self.error['error_code'])
@@ -107,7 +124,7 @@ class XooaClient(object):
     def get_block_by_number_async(self, block_number, **kwargs):
         if self.is_valid:
             blockchain_api = BlockchainApi()
-            r = blockchain_api.block_data(self, block_number, async='true', **kwargs)
+            r = blockchain_api.block_data(self, block_number, asyncKey='true', **kwargs)
             return r
         else:
             raise XooaApiException(self.error['error_msg'], self.error['error_code'])
@@ -123,7 +140,7 @@ class XooaClient(object):
     def get_current_block_async(self, **kwargs):
         if self.is_valid:
             blockchain_api = BlockchainApi()
-            r = blockchain_api.block_height(self, async='true', **kwargs)
+            r = blockchain_api.block_height(self, asyncKey='true', **kwargs)
             return r
         else:
             raise XooaApiException(self.error['error_msg'], self.error['error_code'])
@@ -155,7 +172,7 @@ class XooaClient(object):
     def enroll_identity_async(self, **kwargs):
         if self.is_valid:
             identities_api = IdentitiesApi()
-            r = identities_api.enrollment(self, async='true', **kwargs)
+            r = identities_api.enrollment(self, asyncKey='true', **kwargs)
             return r
         else:
             raise XooaApiException(self.error['error_msg'], self.error['error_code'])
@@ -179,7 +196,7 @@ class XooaClient(object):
     def delete_identity_async(self, identity, **kwargs):
         if self.is_valid:
             identities_api = IdentitiesApi()
-            r = identities_api.delete_identity(self, identity, async='true', **kwargs)
+            r = identities_api.delete_identity(self, identity, asyncKey='true', **kwargs)
             return r
         else:
             raise XooaApiException(self.error['error_msg'], self.error['error_code'])

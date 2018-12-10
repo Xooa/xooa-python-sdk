@@ -1,3 +1,19 @@
+#
+# Python SDK for Xooa
+#
+# Copyright 2018 Xooa
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at:
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
+#
+# Author: Rahul Kamboj
+#
 # coding: utf-8
 
 # python 2 and python 3 compatibility library
@@ -35,7 +51,7 @@ class QueryApi(object):
 
             logger.info('Query API has been called')
 
-            all_params = ['fcn', 'args', 'async', 'timeout']
+            all_params = ['fcn', 'args', 'asyncKey', 'timeout']
 
             params = locals()
             for key, val in six.iteritems(params['kwargs']):
@@ -61,7 +77,7 @@ class QueryApi(object):
             if 'args' in params:
                 query_params['args'] =  json.dumps(params['args'])
             if 'async' in params:
-                query_params['async'] = params['async']
+                query_params['async'] = params['asyncKey']
             else:
                 query_params['async'] = 'false'
             if 'timeout' in params:

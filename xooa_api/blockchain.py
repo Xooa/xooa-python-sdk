@@ -1,3 +1,19 @@
+#
+# Python SDK for Xooa
+#
+# Copyright 2018 Xooa
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at:
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
+#
+# Author: Rahul Kamboj
+#
 # coding: utf-8
 
 from __future__ import absolute_import
@@ -31,7 +47,7 @@ class BlockchainApi(object):
 
             logger.info('Blockchain Data API has been called')
 
-            all_params = ['block_number', 'async', 'timeout']
+            all_params = ['block_number', 'asyncKey', 'timeout']
 
             params = locals()
             for key, val in six.iteritems(params['kwargs']):
@@ -54,7 +70,7 @@ class BlockchainApi(object):
 
             query_params = {}
             if 'async' in params:
-                query_params['async'] = params['async']
+                query_params['async'] = params['asyncKey']
             else:
                 query_params['async'] = 'false'
             if 'timeout' in params:
@@ -110,7 +126,7 @@ class BlockchainApi(object):
 
             logger.debug('Block Height API has been called')
 
-            all_params = ['async', 'timeout']
+            all_params = ['asyncKey', 'timeout']
 
             params = locals()
             for key, val in six.iteritems(params['kwargs']):
@@ -126,7 +142,7 @@ class BlockchainApi(object):
 
             query_params = {}
             if 'async' in params:
-                query_params['async'] = params['async']
+                query_params['async'] = params['asyncKey']
             else:
                 query_params['async'] = 'false'
             if 'timeout' in params:
@@ -155,10 +171,10 @@ class BlockchainApi(object):
 
             else:
                 if request.status_code == 200:
-                    logger.debug("Response: " + response_object)
+                    logger.debug("Response: " + json.dumps(response_object))
                     return response_object
                 elif request.status_code == 202:
-                    logger.debug("Response: " + response_object)
+                    logger.debug("Response: " + json.dumps(response_object))
                     result_id = response_object['resultId']
                     result_url = response_object['resultURL']
                     raise XooaRequestTimeoutException(result_id, result_url)
