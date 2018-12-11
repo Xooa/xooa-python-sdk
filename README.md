@@ -1,6 +1,6 @@
 # XooaClient
 
-This python package makes Xooa Blockchain Platform accessible to users. 
+The official Xooa SDK for Python.
 
 - API version: v1
 - Package version: 1.0.0
