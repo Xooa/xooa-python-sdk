@@ -15,38 +15,40 @@
 # Author: Rahul Kamboj
 #
 
+from xooa_api.api_client import XooaClient
 import unittest
+import time
 import sys
 sys.path.append('..')
-from xooa_api.api_client import XooaClient
 
 
 class TestInvokeApi(unittest.TestCase):
-
-    """InvokeApi unit xooa_test stubs"""
+    """ InvokeApi unit test stubs. """
 
     def setUp(self):
         self.api = XooaClient()
-        api_token = '<API_TOKEN>'
-        set_token = self.api.set_api_token(api_token)
-        validate = self.validate()
+        api_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcGlLZXkiOiIwOFpKNFhTLTQ2RDRQRVQtRzlSRkZZRy1YMlkySEYzIiwiQXBpU2VjcmV0IjoiMXB5RXdhUHg1SFhLT3hWIiwiUGFzc3BocmFzZSI6IjNiMGM0OGZjZjRjN2M4MDQ4Nzg2ZjkwNmU1ZjE4OTdjIiwiaWF0IjoxNTQ2NTE1ODg3fQ.WtdIW0wVgpb6qR9L7W8ElEu9VQWNg0YlF17ML_HNdbY'
+        self.api.set_api_token(api_token)
+        pass
 
     def tearDown(self):
         pass
 
     def test_invoke_async(self):
-
         fcn = 'set'
-        args = {"args": ["args1", "args2"]}
-        invoke_async = self.api.invoke_async(fcn, data=args)
+        args = ["args1", "args2"]
+        invoke_async = self.api.invoke_async(fcn, args)
+        time.sleep(2)
         self.assertEqual(type(invoke_async), dict)
+        pass
 
     def test_invoke_sync(self):
-
         fcn = 'set'
-        args = {"args": ["args1", "args2"]}
-        invoke = self.api.invoke(fcn, data=args, timeout=3000)
+        args = ["args1", "args2"]
+        invoke = self.api.invoke(fcn, args, 4000)
+        time.sleep(2)
         self.assertEqual(type(invoke), dict)
+        pass
 
 
 if __name__ == '__main__':

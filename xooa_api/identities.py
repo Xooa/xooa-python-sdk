@@ -1,3 +1,4 @@
+#
 # Python SDK for Xooa
 #
 # Copyright 2018 Xooa
@@ -19,320 +20,371 @@ from __future__ import absolute_import
 
 # python 2 and python 3 compatibility library
 import six
-
 import requests
 import json
 from .xooa_exceptions import XooaApiException, XooaRequestTimeoutException
 
 
 class IdentitiesApi(object):
+    """ Identities API class to create requests to Identities API. """
 
-    def authenticated_identity_information(self, client_obj):
-        """
-        This End Point Returns Information about the Authenticated Identity
+    def authenticated_identity_information(self, xooa_client):
+        """ Returns the current Identity the API Token points to in the app.
 
-        :param client_obj: Includes Headers and URL to make request
+        :param xooa_client: Includes Headers and URL to make request
         :return:
         """
-        logger = client_obj.xooa_logger
+
+        logger = xooa_client.xooa_logger
+
         try:
-            req_params = client_obj.req_params
+            req_params = xooa_client.req_params
 
-            logger.info("Identity Info Api has been called")
+            logger.info("Calling Identity API for Current Identity info.")
 
-            url_suffix = 'identities/me'
+            url_suffix = '/identities/me'
 
             url = req_params['base_url'] + url_suffix
+
             headers = req_params['headers']
 
-            logger.info("Sending request...")
+            logger.info("Sending request to get current identity...")
 
-            request = requests.get(url, headers=headers)
-            if request.status_code >= 400:
-                raise XooaApiException(request.text, request.status_code)
-            response_object = json.loads(request.text)
+            response = requests.get(url, headers=headers)
 
-            if request.status_code == 200:
+            response_object = json.loads(response.text)
+
+            if response.status_code == 200:
                 return response_object
+
+            elif response.status_code == 202:
+                raise XooaRequestTimeoutException(response_object['resultId'], response_object['resultURL'])
+
             else:
-                request.raise_for_status()
-        except Exception:
-            logger.exception('Got exception on main handler')
+                raise XooaApiException(response.status_code, response_object)
+
+        except XooaApiException:
             raise
 
-    def delete_identity(self, client_obj,  identity, **kwargs):
-        """
-        This Endpoint deletes Identity
+        except XooaRequestTimeoutException:
+            raise
 
-        :param client_obj: Includes Headers and URL to make request
+        except Exception:
+            logger.exception('Got exception on main handler')
+            raise XooaApiException("0", "Exception in fetching Authenticating Identity.")
+
+    def delete_identity(self, xooa_client, identity, timeout, **kwargs):
+        """ Deletes an identity.
+
+        :param xooa_client: Includes Headers and URL to make request
         :param identity: APP ID
+        :param timeout:
         :param kwargs:
-        :param str async: Call this request asynchronously without waiting for response
-        :param str timeout: Request timeout in millisecond
         :return:
         """
-        logger = client_obj.xooa_logger
+
+        logger = xooa_client.xooa_logger
+
         try:
-            req_params = client_obj.req_params
+            req_params = xooa_client.req_params
 
-
-            logger.info('Delete Identity API has been called')
-
-            all_params = ['identity', 'asyncKey', 'timeout']
+            logger.info('Calling Identity API to delete identity')
 
             params = locals()
+
             for key, val in six.iteritems(params['kwargs']):
-                if key not in all_params:
 
-                    logger.error("Got an unexpected keyword argument '%s'"
-                                 " to method delete_identity" % key)
+                if key == 'asyncKey':
+                    params[key] = val
 
-                    raise TypeError(
-                        "Got an unexpected keyword argument '%s'"
-                        " to method delete_identity" % key
-                    )
-                params[key] = val
             del params['kwargs']
+
             # verify the required parameter 'id' is set
-            if 'identity' not in params or params['identity'] is None:
+            if identity is None:
 
                 logger.error("Missing the required parameter `identity` when calling `delete_identity`")
-
                 raise ValueError("Missing the required parameter `identity` when calling `delete_identity`")
 
             query_params = {}
-            if 'async' in params:
+
+            if 'asyncKey' in params:
                 query_params['async'] = params['asyncKey']
             else:
                 query_params['async'] = 'false'
-            if 'timeout' in params:
-                query_params['timeout'] = params['timeout']
+
+            if timeout is not None:
+                query_params['timeout'] = timeout
 
             url_suffix = '/identities/' + identity
 
             url = req_params['base_url'] + url_suffix
+
             headers = req_params['headers']
 
-            logger.info("Sending request...")
+            logger.info("Sending request to delete identity...")
 
-            request = requests.delete(url, headers=headers)
+            response = requests.delete(url, params=query_params, headers=headers)
 
-            if request.status_code >= 400:
-                raise XooaApiException(request.text, request.status_code)
-
-            response_object = json.loads(request.text)
+            response_object = json.loads(response.text)
 
             if query_params['async'] == 'true':
 
-                if request.status_code == 200:
+                if response.status_code == 202:
                     return response_object
+
                 else:
-                    request.raise_for_status()
+                    raise XooaApiException(response.status_code, response_object)
 
             else:
-                if request.status_code == 200:
+                if response.status_code == 200:
                     return response_object
-                elif request.status_code == 202:
-                    result_id = response_object['resultId']
-                    result_url = response_object['resultURL']
-                    raise XooaRequestTimeoutException(result_id, result_url)
+
+                elif response.status_code == 202:
+                    raise XooaRequestTimeoutException(response_object['resultId'], response_object['resultURL'])
+
                 else:
-                    request.raise_for_status()
-        except Exception:
-            logger.exception('Got exception on main handler')
+                    raise XooaApiException(response.status_code, response_object)
+
+        except XooaApiException:
             raise
 
-    def enrollment(self, client_obj, **kwargs):
-        """
-        The Enroll Identity end point is used to  enroll new identities for the Smart Contract app.
-        A success response includes the API Key generated for the identity. This API Key can be used to call API End points
-        on behalf of the enrolled identity. This End Point provides equivalent functionality to adding new identity manually
-        using Xooa console, and identities added using this end point will appear, and can be managed, using Xooa console
-        under the identities tab of the Smart Contract app Required permission: manage identities (canManageIdentities=true)
+        except XooaRequestTimeoutException:
+            raise
 
-        :param client_obj: Includes Headers and URL to make request
-        :param kwargs:
-        :param str async: Call this request asynchronously without waiting for response
-        :param str timeout: Request timeout in millisecond
+        except Exception:
+            logger.exception('Got exception on main handler')
+            raise XooaApiException("0", 'Exception in deleting Identity')
+
+    def enrollment(self, xooa_client, identity, timeout, **kwargs):
+        """ The Enroll identity endpoint is used to enroll new identities for the smart contract app.
+
+         A success response includes the API Token generated for the identity.
+         This API Token can be used to call API End points on behalf of the enrolled identity.
+         This endpoint provides equivalent functionality to adding new identity manually using Xooa console,
+         and identities added using this endpoint will appear, and can be managed,
+         using Xooa console under the identities tab of the smart contract app.
+
+         Required permission: manage identities (canManageIdentities=true)
+
+        :param xooa_client: Includes Headers and URL to make request
+        :param kwargs: Query arguments for the api including Async and timeout
+        :param identity: Identity request object to enroll
+        :param timeout:
         :return:
         """
-        logger = client_obj.xooa_logger
+
+        logger = xooa_client.xooa_logger
+
         try:
-            req_params = client_obj.req_params
+            req_params = xooa_client.req_params
 
-            logger.info('Identity Enrollment API has been called')
-
-            all_params = ['asyncKey', 'timeout', 'data']
+            logger.info('Calling Identity API to Enroll new Identity')
 
             params = locals()
-            for key, val in six.iteritems(params['kwargs']):
-                if key not in all_params:
-                    logger.error("Got an unexpected keyword argument '%s'"
-                                 " to method enrollment" % key)
 
-                    raise TypeError(
-                        "Got an unexpected keyword argument '%s'"
-                        " to method enrollment" % key
-                    )
-                params[key] = val
+            for key, val in six.iteritems(params['kwargs']):
+
+                if key == 'asyncKey':
+                    params[key] = val
+
             del params['kwargs']
 
             query_params = {}
-            if 'async' in params:
+
+            if 'asyncKey' in params:
                 query_params['async'] = params['asyncKey']
             else:
                 query_params['async'] = 'false'
-            if 'timeout' in params:
-                query_params['timeout'] = params['timeout']
 
-            body_params = params['data']
+            if timeout is not None:
+                query_params['timeout'] = timeout
 
-            data = json.dumps(body_params)
+            data = json.dumps(identity)
 
-            url_suffix = 'identities/'
+            url_suffix = '/identities/'
 
             url = req_params['base_url'] + url_suffix
+
             headers = req_params['headers']
 
-            data = json.dumps(body_params)
+            logger.info("Sending request to enroll new identity...")
 
-            logger.info("Sending request...")
+            response = requests.post(url, params=query_params, headers=headers, data=data)
 
-            request = requests.post(url, params=query_params, headers=headers, data=data)
-
-            if request.status_code >= 400:
-                raise XooaApiException(request.text, request.status_code)
-            response_object = json.loads(request.text)
+            response_object = json.loads(response.text)
 
             if query_params['async'] == 'true':
-                if request.status_code == 200:
+
+                if response.status_code == 202:
                     return response_object
+
                 else:
-                    request.raise_for_status()
+                    raise XooaApiException(response.status_code, response_object)
 
             else:
-                if request.status_code == 200:
+
+                if response.status_code == 200:
                     return response_object
-                elif request.status_code == 202:
-                    result_id = response_object['resultId']
-                    result_url = response_object['resultURL']
-                    raise XooaRequestTimeoutException(result_id, result_url)
+
+                elif response.status_code == 202:
+                    raise XooaRequestTimeoutException(response_object['resultId'], response_object['resultURL'])
+
                 else:
-                    request.raise_for_status()
-        except Exception:
-            logger.exception('Got exception on main handler')
+                    raise XooaApiException(response.status_code, response_object)
+
+        except XooaApiException:
             raise
 
-    def identities_get_all_identities(self, client_obj):
-        """
-        Get all identities from the identity registry
+        except XooaRequestTimeoutException:
+            raise
 
-        :param client_obj: Includes Headers and URL to make request
+        except Exception:
+            logger.exception('Got exception on main handler')
+            raise XooaApiException("0", 'Exception in Enrolling a new Identity')
+
+    def identities_get_all_identities(self, xooa_client):
+        """ Get all identities from the identity registry
+
+         Required permission: manage identities (canManageIdentities=true)
+
+        :param xooa_client: Includes Headers and URL to make request
         :return:
         """
-        logger = client_obj.xooa_logger
+
+        logger = xooa_client.xooa_logger
+
         try:
-            req_params = client_obj.req_params
+            req_params = xooa_client.req_params
 
-            logger.info('Get All Identities API has been called')
+            logger.info('Calling Identities API to get all identities')
 
-            url_suffix = 'identities/'
+            url_suffix = '/identities/'
 
             url = req_params['base_url'] + url_suffix
+
             headers = req_params['headers']
 
-            logger.info("Sending request...")
+            logger.info("Sending request to get all identities...")
 
-            request = requests.get(url, headers=headers)
-            if request.status_code >= 400:
-                raise XooaApiException(request.text, request.status_code)
-            response_object = json.loads(request.text)
+            response = requests.get(url, headers=headers)
 
-            if request.status_code == 200:
+            response_object = json.loads(response.text)
+
+            if response.status_code == 200:
                 return response_object
+
+            elif response.status_code == 202:
+                raise XooaRequestTimeoutException(response_object['resultId'], response_object['resultURL'])
+
             else:
-                request.raise_for_status()
+                raise XooaApiException(response.status_code, response_object)
+
+        except XooaApiException:
+            raise
+
+        except XooaRequestTimeoutException:
+            raise
 
         except Exception:
             logger.exception('Got exception on main handler')
-            raise
+            raise XooaApiException("0", 'Exception in fetching all identities enrolled')
 
-    def identity_information(self, client_obj, identity):
-        """
-        Get the specified identity from the identity registry
+    def identity_information(self, xooa_client, identity_id):
+        """ Get the specified identity from the identity registry.
 
-        :param client_obj: Includes Headers and URL to make request
-        :param identity: APP ID
+         Required permission: manage identities (canManageIdentities=true)
+
+        :param xooa_client: Includes Headers and URL to make request
+        :param identity_id: Identity id to get the details
         :return:
         """
-        logger = client_obj.xooa_logger
-        try:
-            req_params = client_obj.req_params
 
-            logger.info('Get Identity API has been called')
+        logger = xooa_client.xooa_logger
+
+        try:
+            req_params = xooa_client.req_params
+
+            logger.info('Calling Identity API to get Identity Info')
+
             # verify the required parameter 'id' is set
-            if identity is None:
+            if identity_id is None:
                 logger.error("Missing the required parameter `id` when calling `identity_information`")
                 raise ValueError("Missing the required parameter `id` when calling `identity_information`")
 
-            url_suffix = 'identities/'+identity
+            url_suffix = '/identities/' + identity_id
 
             url = req_params['base_url'] + url_suffix
+
             headers = req_params['headers']
 
-            logger.info("Sending request...")
+            logger.info("Sending request to get Identity info...")
 
-            request = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers)
 
-            if request.status_code >= 400:
-                raise XooaApiException(request.text, request.status_code)
+            response_object = json.loads(response.text)
 
-            response_object = json.loads(request.text)
-
-            if request.status_code == 200:
+            if response.status_code == 200:
                 return response_object
+
             else:
-                request.raise_for_status()
-        except Exception:
-            logger.exception('Got exception on main handler')
+                raise XooaApiException(response.status_code, response_object)
+
+        except XooaApiException:
             raise
 
-    def regenerate_token(self, client_obj, identity):
-        """
-        Regenerate Identity API Token
+        except Exception:
+            logger.exception('Got exception on main handler')
+            raise XooaApiException('0', 'Exception while fetching Identity details')
 
-        :param client_obj: Includes Headers and URL to make request
-        :param identity: APP ID
+    def regenerate_token(self, xooa_client, identity_id):
+        """ Generates new identity API Token.
+
+         Required permission: manage identities (canManageIdentities=true)
+
+        :param xooa_client: Includes Headers and URL to make request
+        :param identity_id: Identity Id to regenerate token for
         :return:
         """
-        logger = client_obj.xooa_logger
+
+        logger = xooa_client.xooa_logger
+
         try:
-            req_params = client_obj.req_params
+            req_params = xooa_client.req_params
 
-            logger.info('Regenerate Token API has been called')
+            logger.info('Calling Identity API to Regenerate Token')
+
             # verify the required parameter 'id' is set
-            if identity is None:
-
+            if identity_id is None:
                 logger.error("Missing the required parameter `id` when calling `regenerate_token`")
-
                 raise ValueError("Missing the required parameter `id` when calling `regenerate_token`")
 
-            url_suffix = '/identities/' + identity + '/regeneratetoken'
+            url_suffix = '/identities/' + identity_id + '/regeneratetoken'
 
             url = req_params['base_url'] + url_suffix
+
             headers = req_params['headers']
 
-            logger.info("Sending request...")
+            logger.info("Sending request to regenerate API token...")
 
-            request = requests.post(url, headers=headers)
-            if request.status_code >= 400:
-                raise XooaApiException(request.text, request.status_code)
-            response_object = json.loads(request.text)
+            response = requests.post(url, headers=headers)
 
-            if request.status_code == 200:
+            response_object = json.loads(response.text)
+
+            if response.status_code == 200:
                 return response_object
+
+            elif response.status_code == 202:
+                raise XooaRequestTimeoutException(response_object['resultId'], response_object['resultURL'])
+
             else:
-                request.raise_for_status()
+                raise XooaApiException(response.status_code, response_object)
+
+        except XooaApiException:
+            raise
+
+        except XooaRequestTimeoutException:
+            raise
+
         except Exception:
             logger.exception('Got exception on main handler')
-            raise
+            raise XooaApiException('0', 'Exception in regenerate token')

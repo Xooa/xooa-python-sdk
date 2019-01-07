@@ -5,3 +5,4 @@ venv
 docs
 .idea
 xooa_api/__pycache__/
+.coverage

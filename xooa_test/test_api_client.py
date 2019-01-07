@@ -15,49 +15,25 @@
 # Author: Rahul Kamboj
 #
 
+from xooa_api.api_client import XooaClient
 import unittest
+import logging
 import sys
 sys.path.append('..')
-from api_client import XooaClient
-import logging
 
 
 class TestApiClient(unittest.TestCase):
-
-    """BlockchainApi unit xooa_test stubs"""
-
-    # def setUp(self):
-    #     self.api = XooaClient()
+    """ Xooa Client unit tests stubs """
 
     def tearDown(self):
         pass
 
     def test_api_client(self):
         self.api = XooaClient()
-        api_token = '<API_TOKEN>'
-        set_token = self.api.set_api_token(api_token)
-        validate = self.validate()
-
-        set_logging_level = self.api.set_logging_level(logging.debug)
-        # print(c)
+        api_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcGlLZXkiOiIwOFpKNFhTLTQ2RDRQRVQtRzlSRkZZRy1YMlkySEYzIiwiQXBpU2VjcmV0IjoiMXB5RXdhUHg1SFhLT3hWIiwiUGFzc3BocmFzZSI6IjNiMGM0OGZjZjRjN2M4MDQ4Nzg2ZjkwNmU1ZjE4OTdjIiwiaWF0IjoxNTQ2NTE1ODg3fQ.WtdIW0wVgpb6qR9L7W8ElEu9VQWNg0YlF17ML_HNdbY'
+        self.api.set_api_token(api_token)
+        self.api.set_logging_level(logging.debug)
         pass
-
-
-        fcn = 'set'
-        args = {"args": ["args1", "args2"]}
-        invoke = self.api.invoke(fcn, data=args, timeout=3000)
-        # print(invoke)
-        pass
-
-        fcn = 'set'
-        args = {"args": ["args1", "args2"]}
-        invoke_async = self.api.invoke_async(fcn, data=args)
-        # print(invoke_async)
-        pass
-
-        # c = self.api.subscribe_all_events(callback_on_event='callback_on_event')
-        # print(c)
-        # pass
 
 
 if __name__ == '__main__':

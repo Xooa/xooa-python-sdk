@@ -14,6 +14,7 @@
 #
 # Author: Rahul Kamboj
 #
+# coding: utf-8
 
 from socketIO_client_nexus import SocketIO
 

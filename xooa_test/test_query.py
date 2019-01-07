@@ -15,38 +15,40 @@
 # Author: Rahul Kamboj
 #
 
+from xooa_api.api_client import XooaClient
 import unittest
+import time
 import sys
 sys.path.append('..')
-from xooa_api.api_client import XooaClient
 
 
 class TestQueryApi(unittest.TestCase):
-
-    """QueryApi unit xooa_test stubs"""
+    """ QueryApi unit test stubs. """
 
     def setUp(self):
         self.api = XooaClient()
-        api_token = '<API_TOKEN>'
-        set_token = self.api.set_api_token(api_token)
-        validate = self.validate()
+        api_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcGlLZXkiOiIwOFpKNFhTLTQ2RDRQRVQtRzlSRkZZRy1YMlkySEYzIiwiQXBpU2VjcmV0IjoiMXB5RXdhUHg1SFhLT3hWIiwiUGFzc3BocmFzZSI6IjNiMGM0OGZjZjRjN2M4MDQ4Nzg2ZjkwNmU1ZjE4OTdjIiwiaWF0IjoxNTQ2NTE1ODg3fQ.WtdIW0wVgpb6qR9L7W8ElEu9VQWNg0YlF17ML_HNdbY'
+        self.api.set_api_token(api_token)
+        pass
 
     def tearDown(self):
         pass
 
     def test_query_sync(self):
-
-        fcn = 'set'
-        args = ["args1", "args2"]
-        query = self.api.query(fcn, timeout=8000, args=args)
+        fcn = 'get'
+        args = ["args1"]
+        query = self.api.query(fcn, args)
+        time.sleep(2)
         self.assertEqual(type(query), dict)
+        pass
 
     def test_query_async(self):
-
-        fcn = 'set'
-        args = ["args1", "args2"]
-        query_async = self.api.query_async(fcn, args=args)
-        self.assertEqual(type(c), dict)
+        fcn = 'get'
+        args = ["args1"]
+        query_async = self.api.query_async(fcn, args)
+        time.sleep(2)
+        self.assertEqual(type(query_async), dict)
+        pass
 
 
 if __name__ == '__main__':

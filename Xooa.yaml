@@ -1,0 +1,7 @@
+Apps:
+  Xooa-Python:
+    Name: Xooa Python SDK Sample Smart Contract
+    Description: Xooa-Python SDK Smart Contract is a get-set-del smart contract that can be used to insert, fetch and delete data in Xooa Ledger.
+    path: /example/simple/smartcontract/
+    language: go
+    README: https://github.com/Xooa/xooa-python-sdk/blob/master/example/simple/smartcontract/Readme.md

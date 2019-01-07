@@ -15,30 +15,34 @@
 # Author: Rahul Kamboj
 #
 
+from xooa_api.api_client import XooaClient
 import unittest
 import sys
+import time
 sys.path.append('..')
-from xooa_api.api_client import XooaClient
 
 
 class TestResultsApi(unittest.TestCase):
-
-    """ResultsApi unit xooa_test stubs"""
+    """ ResultsApi unit xooa_test stubs. """
 
     def setUp(self):
         self.api = XooaClient()
-        api_token = '<API_TOKEN>'
-        set_token = self.api.set_api_token(api_token)
-        validate = self.validate()
+        api_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcGlLZXkiOiIwOFpKNFhTLTQ2RDRQRVQtRzlSRkZZRy1YMlkySEYzIiwiQXBpU2VjcmV0IjoiMXB5RXdhUHg1SFhLT3hWIiwiUGFzc3BocmFzZSI6IjNiMGM0OGZjZjRjN2M4MDQ4Nzg2ZjkwNmU1ZjE4OTdjIiwiaWF0IjoxNTQ2NTE1ODg3fQ.WtdIW0wVgpb6qR9L7W8ElEu9VQWNg0YlF17ML_HNdbY'
+        self.api.set_api_token(api_token)
+        pass
 
     def tearDown(self):
         pass
 
     def test_results(self):
-
-        result_id = '<RESULT_ID>'
-        result = self.api.result(result_id)
+        fcn = 'set'
+        args = ["args1", "args2"]
+        invoke_async = self.api.invoke_async(fcn, args)
+        result_id = invoke_async['resultId']
+        time.sleep(2)
+        result = self.api.get_result(result_id)
         self.assertEqual(type(result), dict)
+        pass
 
 
 if __name__ == '__main__':

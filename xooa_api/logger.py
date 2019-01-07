@@ -14,6 +14,7 @@
 #
 # Author: Rahul Kamboj
 #
+# coding: utf-8
 
 import logging
 
@@ -21,6 +22,7 @@ import logging
 class Logger:
 
     def get_logger(self, logging_level):
+
         name = 'XooaLogger'
         log_format = '%(asctime)s  %(name)8s  %(levelname)5s  %(message)s'
         logging.basicConfig(level=logging.INFO,

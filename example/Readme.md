@@ -1,6 +1,6 @@
 # Simple 
 
-This example is to demonstrate the basic usage of the functionality available in the Xooa Go SDK.
+This example is to demonstrate the basic usage of the functionality available in the Xooa Python SDK.
 
 ## Directory:
 

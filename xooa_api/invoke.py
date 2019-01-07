@@ -15,106 +15,111 @@
 # Author: Rahul Kamboj
 #
 # coding: utf-8
+
 from __future__ import absolute_import
 
 # python 2 and python 3 compatibility library
 import six
-import ast
 import requests
 import json
 from .xooa_exceptions import XooaApiException, XooaRequestTimeoutException
 
 
 class InvokeApi(object):
+    """ Invoke API Class to create requests to Invoke API. """
 
-    def invoke(self, client_obj, fcn, **kwargs):
-        """
-        The Invoke API End Point is used for submitting transaction for processing by the blockchain Smart Contract app.
-         The end point must call a function already defined in your Smart Contract app which will process the Invoke request.
-         The function name is part of the endpoint URL, or can be entered as the fcn parameter when testing using the Sandbox.
-         For example, if testing the sample get-set Smart Contract app, use ‘set’ (without quotes)  as the value for fcn.
-         The function arguments (number of arguments and type) is determined by the Smart Contract.
-         The Smart Contract is also responsible for arguments validation and exception management.
-         The payload object of Invoke Transaction Response in case of Final Response is determined by the Smart Contract app.
-         A success response may be either 200 or 202.
+    def invoke(self, xooa_client, fcn, args, timeout, **kwargs):
+        """ Invoke Submit block chain transactions in async mode.
 
-        :param client_obj: Includes Headers and URL to make request
-        :param str fcn: function name
+         The Invoke API End Point is used for submitting transaction for processing
+         by the block chain Smart Contract app. The end point must call a function
+         already defined in your Smart Contract app which will process the Invoke request.
+         The function name is part of the endpoint URL, or can be entered as the fcn parameter
+         when testing using the Sandbox.
+         For example, if testing the sample get-set Smart Contract app, use 'set'(without quotes)
+         as the value for fcn. The function arguments (number of arguments and type)
+         is determined by the Smart Contract. The Smart Contract is also responsible for
+         arguments validation and exception management.
+         The payload object of Invoke Transaction Response in case of Final Response
+         is determined by the Smart Contract app. A success response may be either 200 or 202.
+
+        :param xooa_client: Includes Headers and URL to make request
+        :param str fcn: function name to be invoked
+        :param args: Arguments to pass to the smart contract
+        :param timeout:
         :param kwargs:
-        :param str async: Call this request asynchronously without waiting for response
-        :param str timeout: Request timeout in millisecond
         :return:
         """
-        logger = client_obj.xooa_logger
-        try:
-            req_params = client_obj.req_params
 
+        logger = xooa_client.xooa_logger
+
+        try:
+            req_params = xooa_client.req_params
 
             logger.info('Invoke API has been called')
 
-            all_params = ['fcn', 'asyncKey', 'timeout', 'data']
-
             params = locals()
+
             for key, val in six.iteritems(params['kwargs']):
-                if key not in all_params:
-                    logger.error("Got an unexpected keyword argument '%s'"
-                        " to method invoke" % key)
 
-                    raise TypeError(
-                        "Got an unexpected keyword argument '%s'"
-                        " to method invoke" % key
-                    )
-                params[key] = val
+                if key == 'asyncKey':
+                    params[key] = val
+
             del params['kwargs']
+
             # verify the required parameter 'fcn' is set
-            if 'fcn' not in params or params['fcn'] is None:
-
+            if fcn is None:
                 logger.error("Missing the required parameter `fcn` when calling `invoke`")
-
                 raise ValueError("Missing the required parameter `fcn` when calling `invoke`")
 
             query_params = {}
-            if 'async' in params:
+
+            if 'asyncKey' in params:
                 query_params['async'] = params['asyncKey']
             else:
                 query_params['async'] = 'false'
-            if 'timeout' in params:
-                query_params['timeout'] = params['timeout']
 
-            body_params = params['data']
+            if timeout is not None:
+                query_params['timeout'] = timeout
 
-            url_suffix = 'invoke/' + fcn
+            url_suffix = '/invoke/' + fcn
 
             url = req_params['base_url'] + url_suffix
+
             headers = req_params['headers']
 
-            data = json.dumps(body_params)
+            data = json.dumps(args)
 
-            logger.info("Sending request...")
+            logger.info("Sending request to invoke...")
 
-            request = requests.post(url, params=query_params, headers=headers, data=data)
+            response = requests.post(url, params=query_params, headers=headers, data=data)
 
-            if request.status_code >= 400:
-                raise XooaApiException(request.text, request.status_code)
-
-            response_object = json.loads(request.text)
+            response_object = json.loads(response.text)
 
             if query_params['async'] == 'true':
-                if request.status_code == 200:
+
+                if response.status_code == 202:
                     return response_object
+
                 else:
-                    request.raise_for_status()
+                    raise XooaApiException(response.status_code, response_object)
 
             else:
-                if request.status_code == 200:
+                if response.status_code == 200:
                     return response_object
 
-                elif request.status_code == 202:
-                    result_id = response_object['resultId']
-                    result_url = response_object['resultURL']
-                    raise XooaRequestTimeoutException(result_id, result_url)
+                elif response.status_code == 202:
+                    raise XooaRequestTimeoutException(response_object['resultId'], response_object['resultURL'])
+
                 else:
-                    request.raise_for_status()
+                    raise XooaApiException(response.status_code, response_object)
+
+        except XooaApiException:
+            raise
+
+        except XooaRequestTimeoutException:
+            raise
+
         except Exception:
             logger.exception('Got exception on main handler')
-            raise
+            raise XooaApiException('0', 'Exception while Invoking Xooa.')
