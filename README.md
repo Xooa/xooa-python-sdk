@@ -5,8 +5,6 @@ The official Xooa SDK for Python to connect with the Xooa PaaS.
 - API version: v1
 - Package version: 1.0.0
 
-This class contains all the public functions available by SDK.
-
 This SDK refers to smart contract APIs available for Xooa platform. For more details, refer: <https://api.xooa.com/explorer>
 
 Note: XLDB and asset management APIs are not included in the SDK.
