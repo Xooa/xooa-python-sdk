@@ -1,4 +1,4 @@
-# XooaClient
+# Xooa Python SDK
 
 The official Xooa SDK for Python to connect with the Xooa PaaS.
 
