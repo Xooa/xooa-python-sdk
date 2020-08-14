@@ -16,7 +16,7 @@
 #
 # coding: utf-8
 
-from socketIO_client_nexus import SocketIO
+from socketIO_client import SocketIO
 
 
 class EventListener(object):
